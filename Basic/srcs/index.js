@@ -2,4 +2,6 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import App from './App'
 
-ReactDOM.hydrate(<App firstPage="home"/>, document.getElementById('root'));
+const initialData = window.__INITIAL_DATA__;
+console.log(initialData);
+ReactDOM.hydrate(<App firstPage={initialData.page}/>, document.getElementById('root'));

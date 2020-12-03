@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import Home from './Home'
 import About from './About'
+import profile from './profile.jpg'
 
 function App ({ firstPage }) {
 	const [ page, setPage ] = useState(firstPage);
@@ -22,6 +23,7 @@ function App ({ firstPage }) {
 
 	return (
 		<div>
+			<img src={profile} />
 			<button data-page="home" onClick={OnChange}>
 				Home
 			</button>
