@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import Home from './Home'
 import About from './About'
 
-const App = ({ firstPage }) => {
+function App ({ firstPage }) {
 	const [ page, setPage ] = useState(firstPage);
 
 	useEffect(() => {
@@ -12,7 +12,7 @@ const App = ({ firstPage }) => {
 		}
 	}, []);
 
-	const OnChange = e => {
+	function OnChange (e) {
 		const newPage = e.target.dataset.page;
 		window.history.pushState(newPage, '', `/${newPage}`);
 		setPage(newPage);

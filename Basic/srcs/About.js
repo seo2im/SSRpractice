@@ -1,6 +1,6 @@
 import React from 'react'
 
-const Abount = () => {
+function Abount () {
 	return (
 		<div>
 			<h1>About Page</h1>

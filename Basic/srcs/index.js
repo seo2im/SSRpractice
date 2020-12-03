@@ -2,4 +2,4 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import App from './App'
 
-ReactDOM.render(<App firstPage="home"/>, document.getElementById('root'));
+ReactDOM.hydrate(<App firstPage="home"/>, document.getElementById('root'));
