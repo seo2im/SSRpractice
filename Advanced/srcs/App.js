@@ -13,7 +13,6 @@ function fetchUsername () {
 }
 
 function App ({ firstPage }) {
-	console.log("in Client : ", firstPage)
 	const [ page, setPage ] = useState(firstPage);
 	const [ username, setUsername ] = useState(null);
 
@@ -34,7 +33,7 @@ function App ({ firstPage }) {
 		setPage(newPage);
 	}
 
-	const PageComponent = page === 'home' ? Home : About;
+	const PageComponent = (page === 'home' || page === '') ? Home : About;
 
 	return (
 		<div>
