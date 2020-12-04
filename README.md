@@ -116,6 +116,35 @@ app.get('*', (req, res) => {
 })
 ```
 
+### Browse Caching
+
+Whcih page less dependency of data, cache result, use it. Using `lru-cache` module, control memory and time, save & load cache.
+
+```javascript
+import lruCache from 'lruCahce'
+const ssrCache = new lruCache({
+	max : 100, /* max # of pages */
+	maxAge : 1000 * 60; /* caching time */
+})
+
+app.get('*', (req,res) => {
+	~~~
+	const cacheKey = /* key like parse url */
+	/* When have cache, load it */
+	if (ssrCache.has(cacheKey))
+	{
+		res.send(ssrCache.get(cacheKey))
+		return ;
+	}
+	~~~
+	/* save cache */
+	ssrCache.set(cacheKey, result);
+	~~~
+})
+```
+
+
+
 ## ETC
 ### 1. winodw
 **window** is javascript program global object. 
