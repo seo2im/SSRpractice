@@ -203,6 +203,83 @@ app.get('*', (req, res) => {
 })
 ```
 
+## Next
+
+Next is SSR framework in react. Bunlding ssr application automatically, easy to customize with config file.
+
+Basically, bundling wiht react, so dont need `import react`.
+Command `npx next build && npx next start`, make .next directory. This consist of client bundle file & server bundle file.
+
+### Next config & basic
+
+Next basically has load static file like img, setting metadata, style, etc... like below.
+
+```javascript
+/* head setting module */
+import Head from 'next/head'
+function App() {
+	return (
+		<div>
+			{/* Head meta setting */}
+			<Head>
+				<title>Next App</title>
+			</Head>
+			{/* image load (static file in /static )*/}
+			<img src='/static/img.png'>
+			{/* style set */}
+			<style jsx>{`
+				p {
+					color : red;
+				}
+			`}</style>
+		</div>
+	)
+}
+```
+
+But, when load image changed, static path is also changed for browse caching. So we'd better use `file-loader`. In next, bundling setting with next.config.js
+
+```javascript
+module.exports = {
+	webpack : config => {
+		config.module.rules.push({
+			test : /.(png|jpg)$/,
+			use : [
+				{
+					loader : 'file-loader',
+					options : {
+						/* path change when file load */
+						name : '[path][name].[ext]?[hash]',
+						emitFile : false,
+						publicPath : '/',
+					}
+				}
+			]
+		})
+		return config;
+	}
+}
+```
+
+### Send data from server
+
+In next, use `getInitialProps` serving data, no need to use tricky way. `getInitialProps` called before page render.
+
+```javascript
+Page2.getInitialProps = async ({ query }) => {
+	const str = query.str || 'none'
+	return { str };
+}
+
+function Page2({ str }) {
+	~~~
+}
+```
+
+### Move to pages
+
+Next provides `Link`, `Router` like pure react. `Link` set `href` & `Router` can use browser route function like `push` 
+
 ## ETC
 ### 1. winodw
 **window** is javascript program global object. 
