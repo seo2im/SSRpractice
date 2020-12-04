@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build" : "webpack",
+    "build-server": "babel srcs --out-dir dist-server --config-file ./.babelrc.server.js",
+    "build-before": "npm run build-server && webpack",
+    "build" : "webpack && node dist/prerender.bundle.js",
     "start": "node dist/server.bundle.js"
   },
   "keywords": [],

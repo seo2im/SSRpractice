@@ -4,11 +4,11 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 /* Server no need node_bundle, because server can use node_modules any time */
 const nodeExternals = require('webpack-node-externals');
 
-function getConfig(isServer) {
+function getConfig(isServer, name) {
 	return {
-	entry : isServer
-	? { server : './srcs/server.js'}
-	: { main : './srcs/index.js'},
+	entry : {
+		[name] : `./srcs/${name}`
+	},
 
 	output : {
 		/* server no need hash, server no caching */
@@ -30,9 +30,8 @@ function getConfig(isServer) {
 	node : {
 		__dirname : false
 	},
-	optimization : isServer 
-	? {splitChunks : false, minimize : false}
-	: undefined,
+	optimization : isServer ? 
+	{splitChunks : false, minimize : false} : undefined,
 
 	module : {
 		rules : [
@@ -59,10 +58,9 @@ function getConfig(isServer) {
 		]
 	},
 
-	plugins : isServer 
-	? []
+	plugins : isServer ? []
 	: [
-		new CleanWebpackPlugin(),
+		//new CleanWebpackPlugin(),
 		new HtmlWebpackPlugin({
 			template: './template/index.html'
 		})
@@ -72,4 +70,4 @@ function getConfig(isServer) {
 	};
 };
 
-module.exports = [getConfig(false), getConfig(true)];
+module.exports = [getConfig(false, 'index'), getConfig(true, 'server'), getConfig(true, 'prerender')];
