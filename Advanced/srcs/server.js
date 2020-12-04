@@ -1,6 +1,7 @@
 import React from 'react'
 import App from './App'
 import { renderToNodeStream } from 'react-dom/server'
+import { Transform } from 'stream'
 
 import express from 'express'
 import fs from 'fs';
@@ -14,6 +15,22 @@ const ssrCache = new lruCache({
 	max : 100,
 	maxAge : 1000 * 60,
 })
+
+/* Stream for cache */
+function createCacheStream(cacheKey, prefix, postfix) {
+	const chunks = [];
+	return new Transform({
+		transform(data, _, callback) {
+			chunks.push(data);
+			callback(null, data);
+		},
+		flush(callback) {
+			const data = [prefix, Buffer.concat(chunks).toString(), postfix]
+			ssrCache.set(cacheKey, data.join(''))
+			callback();
+		}
+	})
+}
 
 const app = express();
 
@@ -57,6 +74,7 @@ app.get('*', (req, res) => {
 	}
 	else
 	{
+		/* stream start is prefix ; end is posfix */
 		const ROOT_TEXT = '<div id="root">';
 		const prefix = result.substr(
 			0, result.indexOf(ROOT_TEXT) + ROOT_TEXT.length
@@ -64,8 +82,11 @@ app.get('*', (req, res) => {
 		const postfix = result.substr(prefix.length);
 		res.write(prefix);
 		const stream = renderToNodeStream(<App page={page} />)
+		/* make cache stream pipe */
+		const cacheStream = createCacheStream(cacheKey, prefix, postfix)
+		cacheStream.pipe(res);
 		stream.pipe(
-			res,
+			cacheStream, // res => cacheStream
 			{ end : false }
 		);
 		stream.on('end', () => {
