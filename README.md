@@ -143,7 +143,65 @@ app.get('*', (req,res) => {
 })
 ```
 
+### Use NodeToStream
 
+When static file is too big, use `renderToNodeStream` instead of `renderToString`. Steam start sending at first chunk made, more faster.
+
+```javascript
+import { renderToNodeString } from 'react-dom/server'
+
+app.get('*', (req, res) => {
+	~~~
+	if (isPrerender)
+		res.send(result)
+	else
+	{
+		/* stream start, end setting */
+		const ROOT_TEXT = '<div id="root">';
+		const prefix = result.substr(
+			0, result.indexOf(ROOT_TEXT + ROOT_TEXT.length)
+		)
+		const postfix = result.substr(prefix.length)
+		res.write(prefix); //stream start
+		const stream = renderToNodeStream(<App />)
+		stream.pipe(res, { end : false }) //stream runing
+		stream.on('end', () => {res.end(postfix)}) // end option
+	}
+})
+```
+
+When use Nodestream, have to cache data other way. `Transform` make it.
+
+```javascript
+import { Transform } from 'stream';
+/* create caching stream function */
+function createCacheStream(cacheKey, prefix, postfix) {
+	const chunks = [];
+	return new Transform({
+		transform(data, _, callback) {
+			chunks.push(data);
+			callback(null, data);
+		},
+		flush(callback) {
+			const data = [prefix, Buffer.concat(chunks).toString(), postfix]
+			ssrCache.set(cacheKey, data.join(''))
+			callback();
+		}
+	})
+}
+
+app.get('*', (req, res) => {
+	~~~
+	/* make cache stream */
+	const cacheStream = createCacheStream(cacheKey, prefix, postfix)
+	cacheStream.pipe(res);
+	stream.pipe(
+		cacheStream, // res => cacheStream
+		{ end : false }
+	);
+	~~~
+})
+```
 
 ## ETC
 ### 1. winodw
