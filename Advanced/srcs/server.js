@@ -30,10 +30,9 @@ app.get('./favicon.ico', (req, res) => res.sendStatus(204));
 app.get('*', (req, res) => {
 	const parsedUrl = url.parse(req.url, true);
 	const page = parsedUrl.pathname ? parsedUrl.pathname.substr(1) : 'home'
-	console.log(parsedUrl.pathname)
 	const initialData = { page };
 
-	console.log(initialData)
+	/* render only when no pre rendering */
 	const pageHtml = prerenderPages.includes(page)
 		? prerenderPages[page]
 		: renderPage(page);

@@ -60,7 +60,7 @@ function getConfig(isServer, name) {
 
 	plugins : isServer ? []
 	: [
-		//new CleanWebpackPlugin(),
+		//new CleanWebpackPlugin(), -> this delete all
 		new HtmlWebpackPlugin({
 			template: './template/index.html'
 		})
