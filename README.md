@@ -41,6 +41,81 @@ html.replace('__DATA_FROM_SERVER__', JSON.stringfy(someData));
 
 When you want use other module(like file from loader), build server with webpack. But, server bundling has some diff with client bundling. For example, server no need node_bunding because server always get module from node_modules directory. Want more details, ref `Basic/webpack.config.js`
 
+## Advanced
+
+Because SSR use many resources, have way to deal with high traffic. like below
+
+### 1. prerendering page
+
+Which page no dependency of data are pre-rendered when building, better preformance. Also, low dependency page.
+
+For example, page with `username` from server, pre-rendered without name. Later, fetch data from server with api.
+
+```javascript
+/* Get data with API, this worked smillar */
+const fetchData = () => {
+	return new Promise(resolve => {
+		setTimeout(() => resolve(username), 100);
+	})
+}
+
+const App = () => {
+	const [username, setUsername] = useState(null);
+
+	/* first time, get data with api */
+	useEffect(() => {
+		fetchData().then(data => setUsername(data));
+	}, [])
+
+	return (
+		<div>
+			<Component username={username} />
+		</div>
+	)
+}
+```
+
+Page renderer is worked before, server read page before.
+
+```javascript
+import fs from 'fs'
+import path from 'path'
+import { renderToString } from 'react-dom/server'
+import App from './App'
+
+const html = fs.readFileSync(
+	path.resolve(__dirname, '../dist/index.html')
+	'utf8'
+)
+/* preRender Page function*/
+const renderPage = () => {
+	const renderString = renderToString(<App />)
+	const result = html
+		.replace('<div id="root"></div>',
+		`<div id="root">${renderToString}</div>`)
+	return result;
+}
+/* page to html render */
+for (const page of ['page', 'list']) {
+	const result = renderPaeg(page)
+	fs.wirteFileSync(path.resolve(__dirname, `../dist/${page}.html`))
+}
+/* server get pre render page */
+const prerenderPage = {}
+for (const page of ['page', 'list']) {
+	const pageHtml = fs.readFileSync(path.resolve(__dirname, `../dist/${page}.html`), 'utf8')
+	prerenderPage[page] = pageHtml
+}
+app.get('*', (req, res) => {
+	~~~
+	page = /* parse page */
+	const pageHtml = ['page', 'list'].includes(page)
+	? prerenderHtml[page]
+	: renderPage(page)
+	~~~
+})
+```
+
 ## ETC
 ### 1. winodw
 **window** is javascript program global object. 

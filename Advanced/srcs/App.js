@@ -26,7 +26,7 @@ function App ({ firstPage }) {
 
 	useEffect(() => {
 		fetchUsername().then(data => setUsername(data));
-	})
+	}, []);
 
 	function OnChange (e) {
 		const newPage = e.target.dataset.page;
