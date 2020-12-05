@@ -1,0 +1,1 @@
+{"ast":null,"code":"export function func() {\n  return 'Spliting';\n}","map":{"version":3,"sources":["/home/seolim/Desktop/Study/React/SSR/AdvancedNext/srcs/SplitFunction.js"],"names":["func"],"mappings":"AAAA,OAAO,SAASA,IAAT,GAAiB;AACvB,SAAO,UAAP;AACA","sourcesContent":["export function func () {\n\treturn 'Spliting'\n}"]},"metadata":{},"sourceType":"module"}

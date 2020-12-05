@@ -280,6 +280,149 @@ function Page2({ str }) {
 
 Next provides `Link`, `Router` like pure react. `Link` set `href` & `Router` can use browser route function like `push` 
 
+### Error Page
+
+Next error page `_error.js` in pages. Any Next function possible.
+
+## Advanced Next
+
+### _app.js
+
+`_app.js` is component uesd all page, like header menu. `_app.js` get props `Component`, `pageProps`. `Component` is Child page, `pageProps` is Child page's props(`getInitialProps`). 
+
+```javascript
+export default function App ({ Component, pageProps }) {
+	return (
+		<div>
+			<Component {...pageProps}> {/* Component */}
+		</div>
+	)
+}
+```
+
+### Code split in Next
+
+React code split with dynamic import, Next also have. And Next split module code used in common place.
+
+```javascript
+App.getInitialProps = async () => {
+	const { func } = await import('./importModule.js')
+	~~~
+}
+```
+
+### Using custom web server
+
+Above Next, use basic server contained in Next. When use custom server, do somthing more like caching. Next has production or dev-server, we consider it.
+
+```javascript
+const express = require('express')
+const next = require('next')
+
+/* next setting */
+const dev = process.env.NODE_ENV !== 'production'
+const app = next({ dev })
+const handle = app.getRequestHandler(); //handle work in  basic next
+
+app.prepare().then(() => {
+	const server = express();
+
+	server.get('*', (req, res) => {
+		return handle(req, res)
+	})
+
+	server.listen('/* port*/', err => {
+		if (err) throw err;
+	})
+})
+```
+
+Starting server or build and production code below.
+
+```bash
+node server.js
+or
+npx next build
+NODE_ENV=production node server.js
+```
+
+### Browse Caching
+
+As mentioned, custom web server can use caching. use `lru-cache` and `renderToHTML` in next. `renderToHTML` is make static html page.
+
+```javascript
+async function renderAndCache (req, res) {
+	const parsedUrl = url.parse(req.url, true);
+	const cacheKey = parsedUrl.path;
+	if (ssrCache.has(cacheKey)) {
+		res.send(ssrCache.get(cacheKey));
+		return ;
+	}
+	try {
+		const { query, pathname } = parsedUrl;
+		const html = await renderToHTML(req, res, pathname, query);
+		if (res.statusCode === 200) {
+			ssrCache.set(cacheKey, html)
+		}
+		res.send(html);
+	} catch (err) {
+		app.renderError(err, req, res, pathname, query);
+	}
+}
+~~
+app.prepare().then(() => {
+	server.get(/url pattern/, (req, res) => {
+		return renderAndCache();
+	})
+})
+```
+
+### prerendering
+
+Next automatically pre-render page not using `initialPageProps` to html. Futhermore, `exportPathMap` in next.config.js make custom static html pre-rendered. Command `next export`.
+
+```javascript
+module.exports = {
+	/* ~~~ */
+	exportPathMap : function () {
+		return {
+			'/page1' : { page : 'page1'},
+			/* Query string in static page  */
+			'/page2-hello' : { page : '/page2', query : { str : 'hello' }},
+			'/page2-world' : { page : '/page2', query : { str : 'world' }}
+		}
+	}
+}
+```
+
+But manytime, we work static file & js file. So we use render & caching change
+
+```javascript
+const prerenderList = [
+	{ name : 'page1', path : '/page1'},
+	{ name : 'page2-hello', path : '/page2?str=hello'},
+	{ name : 'page2-world', path : '/page2?str=world'}
+]
+const prerenderCache = {};
+if (!dev) {
+	for (const info of prerenderList) {
+		const { name, path } = info;
+		const html = fs.readFileSync(`./out/${name}.html`, 'utf-8'); //prerendering page in out directory
+		prerenderCache[path] = html;
+	}
+}
+/* Rendering and set caching in server */
+async function renderAndCache (req, res) {
+	~~~
+	/* prerendering cache has  */
+	if (prerenderCache.hasOwnProperty(cacheKey)) {
+		res.send(prerenderCache[cacheKey]);
+		return ;
+	}
+}
+```
+
+
 ## ETC
 ### 1. winodw
 **window** is javascript program global object. 
